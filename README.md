@@ -15,10 +15,37 @@ Next approach is to scale the training and test dataset. Because all the columns
 
 ```
 #Code for scaling
-maxs = apply(testdata, 2, max)
-mins = apply(testdata, 2, min)
-scaled_data = as.data.frame(scale(testdata, center = mins, scale = maxs - mins))
-totalrows = nrow(scaled_data);
-testdata = scaled_data[1:totalrows,]
+maxs = apply(dataset, 2, max)
+mins = apply(dataset, 2, min)
+scaled_data = as.data.frame(scale(dataset, center = mins, scale = maxs - mins))
+#Prepare training dataset and test dataset from the scaled_date
 ```
+
+Traing the neural network using the below codes
+```
+# train neural network with training dataset
+n = names(traindata)
+f = as.formula(paste("Target ~", paste(n[!n %in% "Target"], collapse = " + ")))
+print(f)
+nn = neuralnet(f, data=traindata, hidden=c(5,3,3),err.fct="ce",linear.output=FALSE)
+```
+
+Plot the neural network diagram or store it as a png file. These types of statistical images preserve clear visibility of the neural network model you are developing.  
+```
+# train neural network with training dataset
+n = names(traindata)
+f = as.formula(paste("Target ~", paste(n[!n %in% "Target"], collapse = " + ")))
+print(f)
+nn = neuralnet(f, data=traindata, hidden=c(5,3,3),err.fct="ce",linear.output=FALSE)
+```
+
+In order to predict the result from neural network, the corresponding code is:
+```
+# testing neural network with test dataset
+predict = compute(nn, testdata[,1:6])
+predict_result = predict$net.result * (max(traindata$Target)-min(traindata$Target))+min(traindata$Target)
+predict_result = round(predict_result, 6)  #taking upto 6 digit after decimal
+```
+Finally the result output along with prediction has been inserted into MSSQL database. So this R codes deal with MSSQL database only. It reads data as training set from MSSQL database and again sends the prediction output back into MSSQL database.
+
 
